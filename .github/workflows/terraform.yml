@@ -45,6 +45,10 @@ jobs:
       - name: Validate
         run: terraform validate
 
+      # TODO: remover esse step apos o proximo apply bem sucedido
+      - name: Remover service linked role do estado
+        run: terraform state rm aws_iam_service_linked_role.ecs || true
+
       - name: Plan
         id: plan
         run: terraform plan -no-color -out=tfplan

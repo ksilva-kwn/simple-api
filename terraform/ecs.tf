@@ -122,7 +122,7 @@ resource "aws_ecs_service" "app" {
     container_port   = var.container_port
   }
 
-  depends_on = [aws_lb_listener.http]
+  depends_on = [aws_lb_listener.http, aws_iam_service_linked_role.ecs]
 
   lifecycle {
     ignore_changes = [task_definition]

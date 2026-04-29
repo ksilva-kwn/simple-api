@@ -129,6 +129,41 @@ Build ──► Deploy
 
 ---
 
+## Custos estimados
+
+![AWS Calculator](docs/aws-calculator.png)
+
+Estimativa mensal para a infraestrutura rodando 24/7 em `us-east-1`:
+
+| Serviço                  | Custo/mês |
+|--------------------------|-----------|
+| ECS Fargate (1 task)     | $9,01     |
+| RDS PostgreSQL Multi-AZ  | $30,88    |
+| Application Load Balancer| $16,66    |
+| ECR                      | $0,10     |
+| CloudWatch               | $0,25     |
+| **Total**                | **~$56,90** |
+
+### Decisões que reduziram o custo
+
+| O que não usamos         | Economia estimada | Motivo                                                                 |
+|--------------------------|-------------------|------------------------------------------------------------------------|
+| NAT Gateway              | ~$32/mês + dados  | Tasks ECS em subnet pública com `assign_public_ip = true`              |
+| AWS Secrets Manager      | ~$0,40/secret/mês | Substituído por SSM Parameter Store (SecureString) — gratuito          |
+| RDS Proxy                | proporcional ao RDS| Não necessário para a escala atual                                    |
+| CloudWatch Database Insights | variável     | Monitoramento básico suficiente para o projeto                         |
+| RDS Extended Support     | variável          | PostgreSQL 16 ainda em suporte padrão                                  |
+
+### Como reduzir ainda mais (trade-offs)
+
+| Mudança                        | Economia           | Trade-off                                      |
+|--------------------------------|--------------------|------------------------------------------------|
+| RDS Single-AZ                  | ~$15/mês           | Sem failover automático em caso de falha de AZ |
+| Fargate Spot                   | até 70% do Fargate | Tasks podem ser interrompidas pela AWS         |
+| Reserved Instance (RDS, 1 ano) | até 40% do RDS     | Compromisso de 1 ano de uso                    |
+
+---
+
 ## Estado do Terraform
 
 O estado é armazenado remotamente com lock para evitar execuções simultâneas.
@@ -171,6 +206,8 @@ O estado é armazenado remotamente com lock para evitar execuções simultâneas
 │       ├── terraform.yml     # Pipeline de infraestrutura
 │       └── deploy.yml        # Pipeline de aplicação
 ├── docs/
-│   └── kxc-simple-api.html   # Diagrama da arquitetura
+│   ├── kxc-simple-api.html        # Diagrama da arquitetura
+│   ├── ecs-tasks-autoscaling.png  # Auto Scaling em ação
+│   └── aws-calculator.png         # Estimativa de custos
 └── Dockerfile
 ```

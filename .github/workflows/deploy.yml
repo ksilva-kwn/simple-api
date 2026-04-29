@@ -7,6 +7,7 @@ on:
       - 'src/**'
       - 'Dockerfile'
       - 'package*.json'
+  workflow_dispatch:
 
 env:
   AWS_REGION: "us-east-1"

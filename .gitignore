@@ -102,3 +102,12 @@ dist
 
 # TernJS port file
 .tern-port
+
+# Terraform
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/tfplan
+terraform/terraform.tfvars
+terraform/override.tf
+terraform/override.tf.json

@@ -28,7 +28,7 @@ API REST em Node.js com conexão a banco de dados PostgreSQL, rodando em infraes
 
 ## Infraestrutura
 
-![Diagrama da arquitetura](docs/kxc-simple-api.png)
+> Diagrama completo em [`docs/kxc-simple-api.html`](docs/kxc-simple-api.html)
 
 ### Visão geral
 
@@ -74,6 +74,34 @@ Tasks escalando horizontalmente conforme a carga aumenta:
 **Observabilidade**
 - Container Insights habilitado no ECS cluster
 - Logs centralizados no CloudWatch (`/ecs/kxc-simple-api`, retenção 7 dias)
+
+---
+
+## Segurança
+
+### Rede
+
+- **Subnets privadas para o RDS** — o banco não tem IP público e não é acessível pela internet, apenas pelas tasks ECS dentro da VPC
+- **Security Groups com least privilege** — cada camada só aceita tráfego da camada imediatamente anterior:
+  - ALB SG: aceita HTTP (80) da internet
+  - ECS SG: aceita tráfego apenas do ALB SG
+  - RDS SG: aceita PostgreSQL (5432) apenas do ECS SG
+- **Sem NAT Gateway** — as tasks ECS ficam em subnet pública com IP próprio, mas o RDS continua isolado em subnet privada sem rota para a internet
+
+### Credenciais
+
+- **SSM Parameter Store (SecureString)** — a senha do banco é armazenada criptografada com KMS e nunca aparece em texto claro no código, no Terraform state ou nas variáveis de ambiente em texto puro da task definition
+- A task definition referencia o ARN do parâmetro via `secrets`, e o ECS injeta o valor em runtime — a aplicação recebe a senha como variável de ambiente sem que ela trafegue pelo código
+- A IAM role de execução do ECS tem permissão mínima: só lê exatamente o parâmetro da senha do banco (`ssm:GetParameter` no ARN específico)
+
+### Container
+
+- A imagem roda com usuário não-root (`node`) — um processo comprometido dentro do container não tem privilégios de root no host
+
+### IAM
+
+- **Least privilege** — o IAM user usado nas pipelines do GitHub Actions tem apenas as permissões necessárias para o deploy: ECR push, ECS update, SSM read e Terraform state no S3/DynamoDB
+- Nenhuma política `*` ou `AdministratorAccess` no user de CI/CD
 
 ---
 
@@ -206,7 +234,7 @@ O estado é armazenado remotamente com lock para evitar execuções simultâneas
 │       ├── terraform.yml     # Pipeline de infraestrutura
 │       └── deploy.yml        # Pipeline de aplicação
 ├── docs/
-│   ├── kxc-simple-api.png         # Diagrama da arquitetura
+│   ├── kxc-simple-api.html        # Diagrama da arquitetura
 │   ├── ecs-tasks-autoscaling.png  # Auto Scaling em ação
 │   └── aws-calculator.png         # Estimativa de custos
 └── Dockerfile

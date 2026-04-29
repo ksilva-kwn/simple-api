@@ -28,7 +28,7 @@ API REST em Node.js com conexão a banco de dados PostgreSQL, rodando em infraes
 
 ## Infraestrutura
 
-> Diagrama completo em [`docs/kxc-simple-api.html`](docs/kxc-simple-api.html)
+![Diagrama da arquitetura](docs/kxc-simple-api.png)
 
 ### Visão geral
 
@@ -206,7 +206,7 @@ O estado é armazenado remotamente com lock para evitar execuções simultâneas
 │       ├── terraform.yml     # Pipeline de infraestrutura
 │       └── deploy.yml        # Pipeline de aplicação
 ├── docs/
-│   ├── kxc-simple-api.html        # Diagrama da arquitetura
+│   ├── kxc-simple-api.png         # Diagrama da arquitetura
 │   ├── ecs-tasks-autoscaling.png  # Auto Scaling em ação
 │   └── aws-calculator.png         # Estimativa de custos
 └── Dockerfile

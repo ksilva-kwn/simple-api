@@ -16,7 +16,7 @@ const express = require('express');
     })
 
     app.get('/', async (req, res) => {
-        const response = { 'message': "API OK!", 'request_id': i }
+        const response = { 'message': "API OK!", 'request_id': i, 'hostname': require('os').hostname() }
         console.log(response)
         res.send(response)
     })

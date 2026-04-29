@@ -38,6 +38,12 @@ Usuário → ALB → ECS Fargate (Tasks) → RDS PostgreSQL
                     ECR
 ```
 
+### Auto Scaling em ação
+
+Tasks escalando horizontalmente conforme a carga aumenta:
+
+![ECS Tasks Auto Scaling](docs/ecs-tasks-autoscaling.png)
+
 ### Componentes
 
 **Rede**
@@ -68,6 +74,24 @@ Usuário → ALB → ECS Fargate (Tasks) → RDS PostgreSQL
 **Observabilidade**
 - Container Insights habilitado no ECS cluster
 - Logs centralizados no CloudWatch (`/ecs/kxc-simple-api`, retenção 7 dias)
+
+---
+
+## Testes de resiliência
+
+### Auto-recovery de tasks
+
+Ao parar uma task manualmente via console ECS, o serviço detecta que o `desired_count` não está satisfeito e provisiona uma nova task automaticamente em ~30 segundos, sem intervenção manual.
+
+### Auto Scaling por CPU
+
+Carga gerada com `wrk` contra o ALB:
+
+```bash
+wrk -t4 -c300 -d10m http://<alb-endpoint>/
+```
+
+Com CPU média do serviço acima de 70% por 2 períodos consecutivos de 60s, o Application Auto Scaling provisiona novas tasks. Ao cessar a carga, o scale in ocorre após 300s de CPU abaixo do target, voltando ao mínimo de 1 task.
 
 ---
 

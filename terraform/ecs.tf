@@ -50,7 +50,7 @@ resource "aws_lb_listener" "http" {
   }
 }
 
-# ─── ECS Task Definition ────────────────────────────────────────────────────────
+# ─── ECS Task Definition ───────────────────────────────────────────────────────
 
 resource "aws_ecs_task_definition" "app" {
   family                   = var.project_name
@@ -71,11 +71,11 @@ resource "aws_ecs_task_definition" "app" {
     }]
 
     environment = [
-      { name = "API_PORT",    value = tostring(var.container_port) },
-      { name = "DB_HOST",     value = aws_db_instance.postgres.address },
-      { name = "DB_PORT",     value = "5432" },
+      { name = "API_PORT", value = tostring(var.container_port) },
+      { name = "DB_HOST", value = aws_db_instance.postgres.address },
+      { name = "DB_PORT", value = "5432" },
       { name = "DB_DATABASE", value = var.db_name },
-      { name = "DB_USER",     value = var.db_username },
+      { name = "DB_USER", value = var.db_username },
     ]
 
     secrets = [
@@ -125,7 +125,6 @@ resource "aws_ecs_service" "app" {
   depends_on = [aws_lb_listener.http]
 
   lifecycle {
-    # A pipeline de deploy atualiza a task definition — Terraform não deve reverter
     ignore_changes = [task_definition]
   }
 }

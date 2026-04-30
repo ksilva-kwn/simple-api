@@ -30,14 +30,6 @@ API REST em Node.js com conexão a banco de dados PostgreSQL, rodando em infraes
 
 > Diagrama completo em [`docs/kxc-simple-api.html`](docs/kxc-simple-api.html)
 
-### Visão geral
-
-```
-Usuário → ALB → ECS Fargate (Tasks) → RDS PostgreSQL
-                     ↑
-                    ECR
-```
-
 ### Auto Scaling em ação
 
 Tasks escalando horizontalmente conforme a carga aumenta:

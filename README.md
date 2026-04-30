@@ -30,19 +30,17 @@ API REST em Node.js com conexão a banco de dados PostgreSQL, rodando em infraes
 
 > Diagrama completo em [`docs/kxc-simple-api.html`](docs/kxc-simple-api.html)
 
-### Visão geral
+### Decisões de arquitetura
 
-```
-Usuário → ALB → ECS Fargate (Tasks) → RDS PostgreSQL
-                     ↑
-                    ECR
-```
-
-### Auto Scaling em ação
-
-Tasks escalando horizontalmente conforme a carga aumenta:
-
-![ECS Tasks Auto Scaling](docs/ecs-tasks-autoscaling.png)
+| Serviço escolhido | Alternativa considerada | Por que essa escolha |
+|---|---|---|
+| **ECS Fargate** | EC2, EKS | Sem gerenciamento de servidores — a AWS cuida do SO, patches e capacidade. Kubernetes (EKS) seria overkill para uma API simples. |
+| **RDS Multi-AZ** | RDS Single-AZ | Failover automático em ~60s sem intervenção manual. Com Single-AZ, uma falha de hardware ou AZ derruba o banco sem recuperação automática. |
+| **ALB** | NLB, API Gateway | O ALB opera na camada HTTP — faz health check real na rota `/`, distribui por round-robin e suporta roteamento por path. NLB é TCP puro, sem consciência HTTP. API Gateway adicionaria custo e complexidade desnecessários. |
+| **SSM Parameter Store** | Secrets Manager | Mesma criptografia KMS, mesmo controle de acesso por IAM — mas gratuito. O Secrets Manager agrega rotação automática, que não é necessária aqui. |
+| **ECS em subnet pública** | NAT Gateway | Tasks ECS recebem IP público diretamente via `assign_public_ip = true`, eliminando a necessidade de NAT Gateway (~$32/mês). O RDS continua isolado em subnet privada. |
+| **ECR** | Docker Hub | Integração nativa com ECS e IAM, sem rate limits, imagens privadas sem custo adicional significativo e latência menor por estar na mesma região. |
+| **S3 + DynamoDB (Terraform state)** | State local | State remoto permite que o pipeline rode na cloud sem depender de máquina local. O DynamoDB garante que dois applies nunca rodem ao mesmo tempo (lock). |
 
 ### Componentes
 
@@ -239,3 +237,8 @@ O estado é armazenado remotamente com lock para evitar execuções simultâneas
 │   └── aws-calculator.png         # Estimativa de custos
 └── Dockerfile
 ```
+### Auto Scaling em ação
+
+Tasks escalando horizontalmente conforme a carga aumenta:
+
+![ECS Tasks Auto Scaling](docs/ecs-tasks-autoscaling.png)

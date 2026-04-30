@@ -40,7 +40,10 @@ API REST em Node.js com conexão a banco de dados PostgreSQL, rodando em infraes
 | **SSM Parameter Store** | Secrets Manager | Mesma criptografia KMS, mesmo controle de acesso por IAM — mas gratuito. O Secrets Manager agrega rotação automática, que não é necessária aqui. |
 | **ECS em subnet pública** | NAT Gateway | Tasks ECS recebem IP público diretamente via `assign_public_ip = true`, eliminando a necessidade de NAT Gateway (~$32/mês). O RDS continua isolado em subnet privada. |
 | **ECR** | Docker Hub | Integração nativa com ECS e IAM, sem rate limits, imagens privadas sem custo adicional significativo e latência menor por estar na mesma região. |
-| **S3 + DynamoDB (Terraform state)** | State local | State remoto permite que o pipeline rode na cloud sem depender de máquina local. O DynamoDB garante que dois applies nunca rodem ao mesmo tempo (lock). |
+| **S3** (Terraform state) | State local | State remoto permite que o pipeline rode na cloud sem depender de máquina local. Qualquer pessoa ou pipeline sempre lê o estado real da infraestrutura. |
+| **DynamoDB** (lock do state) | Sem lock | Impede que dois applies rodem simultaneamente — sem isso, dois pushes paralelos poderiam corromper o state ou criar recursos duplicados. |
+| **Terraform** | Console AWS, CDK, Pulumi | IaC declarativa — o estado desejado da infraestrutura fica versionado junto ao código. Qualquer mudança passa por review antes de ser aplicada, e o histórico do git documenta o que mudou e quando. |
+| **GitHub + GitHub Actions** | GitLab, Bitbucket, Jenkins | Repositório e pipelines na mesma plataforma, sem infraestrutura de CI/CD para manter. As pipelines disparam automaticamente por path — mudanças em `terraform/` rodam só o Terraform, mudanças em `src/` rodam só o deploy da aplicação. |
 
 ### Componentes
 

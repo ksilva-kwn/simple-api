@@ -30,12 +30,6 @@ API REST em Node.js com conexão a banco de dados PostgreSQL, rodando em infraes
 
 > Diagrama completo em [`docs/kxc-simple-api.html`](docs/kxc-simple-api.html)
 
-### Auto Scaling em ação
-
-Tasks escalando horizontalmente conforme a carga aumenta:
-
-![ECS Tasks Auto Scaling](docs/ecs-tasks-autoscaling.png)
-
 ### Componentes
 
 **Rede**
@@ -231,3 +225,8 @@ O estado é armazenado remotamente com lock para evitar execuções simultâneas
 │   └── aws-calculator.png         # Estimativa de custos
 └── Dockerfile
 ```
+### Auto Scaling em ação
+
+Tasks escalando horizontalmente conforme a carga aumenta:
+
+![ECS Tasks Auto Scaling](docs/ecs-tasks-autoscaling.png)
